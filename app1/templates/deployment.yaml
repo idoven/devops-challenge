@@ -1,29 +1,44 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: app1-deployment
+  name: {{ .Chart.Name }}-deployment
   labels:
-    app: app1
+    app: {{ .Chart.Name }}
+  namespace: apps
 spec:
   selector:
     matchLabels:
-      app: app1
+      app: {{ .Chart.Name }}
   template:
     metadata:
       labels:
-        app: app1
+        app: {{ .Chart.Name }}
     spec:
+      serviceAccountName: {{ .Chart.Name }}-sa
+      automountServiceAccountToken: false
       containers:
         - name: api
-          image: debian:bullseye-slim
+          image: {{ .Values.application.api.image }}
           command:
-            - ["./script/run.sh"]
+            - "/bin/sh"
+            - "/script/run.sh"
           envFrom:
             - configMapRef:
-                name: app1-configmap
+                name: {{ .Chart.Name }}-configmap
           volumeMounts:
             - name: script
               mountPath: /script
+          resources:
+            requests:
+              memory: {{ .Values.application.api.resources.requests.memory }}
+              cpu: {{ .Values.application.api.resources.requests.cpu }}
+            limits:
+              memory: {{ .Values.application.api.resources.limits.memory }}
+              cpu: {{ .Values.application.api.resources.limits.cpu }}
+          securityContext:
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsUser: 65534
       volumes:
         - name: script
           configMap:

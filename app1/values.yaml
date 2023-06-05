@@ -1,3 +1,12 @@
 timezone: ''
-
 time: ''
+application:
+  api:
+    image: alpine:3.14
+    resources: 
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "256Mi"
+        cpu: "200m"
